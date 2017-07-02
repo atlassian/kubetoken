@@ -1,0 +1,26 @@
+apiVersion: v1
+data:
+  kubetoken.json: |
+    {
+       "environments": [
+          {
+             "customer": "example",
+             "env": "prod",
+             "contexts": [
+                {
+                   "clusters": {
+                      "cell-0": "https://kubernetes.cell-0.example.com",
+                      "cell-1": "https://kubernetes.cell-1.example.com",
+                      "cell-2": "https://kubernetes.cell-2.example.com",
+                   },
+                   "cacert": "/ssl/example/ca.pem",
+                   "privkey": "/ssl/example/ca-key.pem"
+                }
+             ]
+          }
+       ]
+    }
+kind: ConfigMap
+metadata:
+  name: kubetoken-config
+  namespace: kube-system

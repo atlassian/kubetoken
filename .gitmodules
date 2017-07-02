@@ -1,0 +1,30 @@
+[submodule "vendor/gopkg.in/ldap.v2"]
+	path = vendor/gopkg.in/ldap.v2
+	url = https://gopkg.in/ldap.v2
+[submodule "vendor/gopkg.in/asn1-ber.v1"]
+	path = vendor/gopkg.in/asn1-ber.v1
+	url = https://gopkg.in/asn1-ber.v1
+[submodule "vendor/github.com/gorilla/handlers"]
+	path = vendor/github.com/gorilla/handlers
+	url = https://github.com/gorilla/handlers
+[submodule "vendor/github.com/gorilla/mux"]
+	path = vendor/github.com/gorilla/mux
+	url = https://github.com/gorilla/mux
+[submodule "vendor/gopkg.in/alecthomas/kingpin.v2"]
+	path = vendor/gopkg.in/alecthomas/kingpin.v2
+	url = https://gopkg.in/alecthomas/kingpin.v2
+[submodule "vendor/github.com/alecthomas/template"]
+	path = vendor/github.com/alecthomas/template
+	url = https://github.com/alecthomas/template
+[submodule "vendor/github.com/alecthomas/units"]
+	path = vendor/github.com/alecthomas/units
+	url = https://github.com/alecthomas/units
+[submodule "vendor/github.com/howeyc/gopass"]
+	path = vendor/github.com/howeyc/gopass
+	url = https://github.com/howeyc/gopass
+[submodule "vendor/golang.org/x/crypto"]
+	path = vendor/golang.org/x/crypto
+	url = https://go.googlesource.com/crypto
+[submodule "vendor/github.com/pkg/errors"]
+	path = vendor/github.com/pkg/errors
+	url = https://github.com/pkg/errors

@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubetoken
+  namespace: kube-system
+spec:
+  rules:
+  - host: kubetoken.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: kubetoken
+          servicePort: 80
+        path: /

@@ -1,0 +1,9 @@
+language: go
+go_import_path: github.com/atlassian/kubetoken
+go:
+  - 1.8.x
+  - tip
+
+script:
+  - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test 
+  - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test -race

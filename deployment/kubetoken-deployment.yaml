@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kubetoken
+  namespace: kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubetoken
+    spec:
+      containers:
+      - image: atlassian/kubetoken:kubernetes
+        imagePullPolicy: Always
+        name: kubetoken
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        volumeMounts:
+        - name: "certs"
+          mountPath: "/ssl/example"
+        - name: "config"
+          mountPath: "/config"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+      volumes:
+      - name: "certs"
+        secret:
+          secretName: "kubetoken-example"
+          items:
+          - key: "ca.pem"
+            path: "ca.pem"
+          - key: "ca-key.pem"
+            path: "ca-key.pem"
+      - name: "config"
+        configMap:
+          name: "kubetoken-config"
+          items:
+          - key: "kubetoken.json"
+            path: "kubetoken.json"
