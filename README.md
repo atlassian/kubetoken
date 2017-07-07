@@ -8,7 +8,7 @@
 
 ## Installation
 
-Installation is covered in a [seperate document](INSTALLTION.md).
+Installation is covered in a [seperate document](INSTALLATION.md).
 
 ## Deployment
 
