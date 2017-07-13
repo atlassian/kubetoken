@@ -23,7 +23,7 @@ type ADRoleValidater struct {
 }
 
 func (r *ADRoleValidater) ValidateRoleForUser(user, role string) error {
-	roledn := fmt.Sprintf("cn=%s,ou=access,%s", escapeDN(role), SearchBase)
+	roledn := fmt.Sprintf("cn=%s,ou=access,ou=groups,%s", escapeDN(role), SearchBase)
 	filter := fmt.Sprintf("(&(objectCategory=Person)(sAMAccountName=*)(memberOf:1.2.840.113556.1.4.1941:=%s))", roledn)
 	kubeRoles := ldap.NewSearchRequest(
 		userdn(user),
