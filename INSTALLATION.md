@@ -32,6 +32,18 @@ To set the LDAP search base when building `cmd/kubetoken` _and_ `cmd/kubetokend`
 
 You _must_ set the LDAP search base for both`cmd/kubetoken` _and_ `cmd/kubetokend`.
 
+## DUO two factor authentication
+
+Kubetoken supports 2fa via the DUO. This feature is disabled bu default. To enable this feature set the following three variables when linking `kubetoken`
+
+```
+-X main.duoIKey=$your duo ikey value$
+-X main.duoSKey=$your duo skey value$
+-X main.duoAPIHost=$the hostname of your duo api server$
+```
+
+All three values can be retrieved from the admin console by someone with Duo administration rights for your organisation.
+
 ## kubetoken cli
 
 Once built, `kubetoken` can be distributed to your users as a single binary.
