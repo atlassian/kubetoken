@@ -76,7 +76,7 @@ func main() {
 
 	// perform duo authentication (if required)
 	if duoSKey != "" && duoIKey != "" && duoAPIHost != "" {
-		fmt.Println("awaiting DUO auth...")
+		fmt.Println("Awaiting DUO auth...")
 		err = duoAuth(*user)
 		check(err)
 	}
@@ -156,7 +156,25 @@ func duoAuth(staffid string) error {
 
 	// you'd think at this point that the request was approved, oh no, not so grasshopper.
 	// duo returns a 200 with a json body which contains a result key which has the words
-	// "allow", "deny"
+	// "allow", "deny", so we must inspect that
+	var result struct {
+		Stat     string `json:"stat"`
+		Response struct {
+			Result  string `json:"result"`
+			Status  string `json:"status"`
+			Message string `json:"status_msg"`
+		} `json:"response"`
+	}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return err
+	}
+	if result.Stat != "OK" {
+		return fmt.Errorf("request failed: %s", body)
+	}
+	if result.Response.Result != "allow" {
+		return fmt.Errorf("request denied: %s: %s", result.Response.Status, result.Response.Message)
+	}
 
 	return nil
 }
