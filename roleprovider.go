@@ -30,7 +30,6 @@ func (r *ADRoleProvider) FetchRolesForUser(user string) ([]string, error) {
 }
 
 func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
-	var roles []string
 	conn, err := creds.Bind()
 	if err != nil {
 		return nil, err
@@ -38,7 +37,7 @@ func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
 	defer conn.Close()
 
 	// find all the kube- roles
-	filter := fmt.Sprintf("(&(cn=kube-*)(member:1.2.840.113556.1.4.1941:=%s))", userdn)
+	filter := fmt.Sprintf("(&(cn=kube-*-*-*-dl-*)(member:1.2.840.113556.1.4.1941:=%s))", userdn)
 	kubeRoles := ldap.NewSearchRequest(
 		"OU=access,OU=groups,"+SearchBase,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -51,17 +50,11 @@ func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
 		return nil, err
 	}
 
-	// exclude this historical role that matches the SSAM pattern we chose.
-	const stashRole = "kube-platform-team-dl-stash"
-
+	var roles []string
 	for _, e := range sr.Entries {
 		role := e.GetAttributeValue("cn")
-		if role == stashRole {
-			continue
-		}
 		roles = append(roles, role)
 	}
-
 	return roles, nil
 }
 
