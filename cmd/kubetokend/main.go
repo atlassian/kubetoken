@@ -47,13 +47,13 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Handle("/api/v1/signcsr", &CertificateSigner{
+	r.Handle("/api/v1/signcsr", BasicAuth(&CertificateSigner{
 		LDAPHost: *ldapHost,
 		Config:   config,
-	})
-	r.Handle("/api/v1/roles", &RoleHandler{
+	}))
+	r.Handle("/api/v1/roles", BasicAuth(&RoleHandler{
 		ldaphost: *ldapHost,
-	})
+	}))
 	r.HandleFunc("/healthcheck", func(w http.ResponseWriter, req *http.Request) {
 		io.WriteString(w, "OK")
 	})
@@ -86,11 +86,22 @@ func binddn(user string) string {
 	return "CN=%s,OU=people,DC=office,DC=atlassian,DC=com"
 }
 
+func BasicAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		_, _, ok := req.BasicAuth()
+		if !ok {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+			http.Error(w, "Authentication required", 401)
+			return
+		}
+		next.ServeHTTP(w, req)
+	})
+}
+
 func (s *CertificateSigner) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	user, pass, ok := req.BasicAuth()
 	if !ok {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		http.Error(w, "Authentication required", 401)
+		http.Error(w, "Forbidden", 403)
 		return
 	}
 
@@ -194,8 +205,7 @@ type RoleHandler struct {
 func (r *RoleHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	user, pass, ok := req.BasicAuth()
 	if !ok {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		http.Error(w, "Authentication required", 401)
+		http.Error(w, "Forbidden", 403)
 		return
 	}
 
