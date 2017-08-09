@@ -28,6 +28,3 @@
 [submodule "vendor/github.com/pkg/errors"]
 	path = vendor/github.com/pkg/errors
 	url = https://github.com/pkg/errors
-[submodule "vendor/github.com/duosecurity/duo_api_golang"]
-	path = vendor/github.com/duosecurity/duo_api_golang
-	url = https://github.com/duosecurity/duo_api_golang
