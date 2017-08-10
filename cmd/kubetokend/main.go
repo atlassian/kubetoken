@@ -51,10 +51,20 @@ func main() {
 		LDAPHost: *ldapHost,
 		Config:   config,
 	})
+
+	// If Duo is enabled, redirect signcsr to a duo authenticated version
+	// this lets the client detect this and print the appropriate message
+	// before re-submitting.
 	if duoEnabled() {
-		signer = DuoAuth(signer)
+		r.HandleFunc("/api/v1/signcsr", func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Location", "/api/v1/signcsr2fa")
+			w.WriteHeader(399)
+		})
+	} else {
+		r.Handle("/api/v1/signcsr", BasicAuth(signer))
 	}
-	r.Handle("/api/v1/signcsr", BasicAuth(signer))
+
+	r.Handle("/api/v1/signcsr2fa", BasicAuth(DuoAuth(signer)))
 	r.Handle("/api/v1/roles", BasicAuth(&RoleHandler{
 		ldaphost: *ldapHost,
 	}))

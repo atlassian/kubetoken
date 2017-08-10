@@ -138,7 +138,15 @@ func submitCSR(uri string, user, pass string, csr []byte) (*kubetoken.Certificat
 	switch resp.StatusCode {
 	case 200:
 		return decodeResponseBody(resp.Body)
-
+	case 399:
+		// this is a special case where the client should be redirected to duo auth endpoint
+		u, err := url.Parse(uri)
+		if err != nil {
+			return nil, err
+		}
+		uri = fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, resp.Header.Get("Location"))
+		fmt.Println("Awaiting DUO Auth.")
+		return submitCSR(uri, user, pass, csr)
 	default:
 		body, _ := ioutil.ReadAll(resp.Body)
 		return nil, errors.Errorf("expected 200, got %v\n%s", resp.Status, body)
