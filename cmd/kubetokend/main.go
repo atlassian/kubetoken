@@ -47,10 +47,14 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Handle("/api/v1/signcsr", BasicAuth(&CertificateSigner{
+	signer := http.Handler(&CertificateSigner{
 		LDAPHost: *ldapHost,
 		Config:   config,
-	}))
+	})
+	if duoEnabled() {
+		signer = DuoAuth(signer)
+	}
+	r.Handle("/api/v1/signcsr", BasicAuth(signer))
 	r.Handle("/api/v1/roles", BasicAuth(&RoleHandler{
 		ldaphost: *ldapHost,
 	}))

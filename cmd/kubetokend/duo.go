@@ -3,16 +3,38 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 
 	"github.com/duosecurity/duo_api_golang"
 )
 
-const (
+var (
 	duoIKey    = ""
 	duoSKey    = ""
 	duoAPIHost = ""
 )
+
+// duoEnabled returns true when duoIKey, duoSKey, and duoAPIHost are non zero.
+func duoEnabled() bool {
+	return duoIKey != "" && duoSKey != "" && duoAPIHost != ""
+}
+
+func DuoAuth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		staffid, _, ok := req.BasicAuth()
+		if !ok {
+			if !ok {
+				http.Error(w, "Forbidden", 403)
+				return
+			}
+		}
+		if err := duoAuth(staffid); err != nil {
+			http.Error(w, err.Error(), 403)
+		}
+		next.ServeHTTP(w, req)
+	})
+}
 
 func duoAuth(staffid string) error {
 	const userAgent = "kubetoken/1.0"
