@@ -9,18 +9,8 @@ import (
 	"github.com/duosecurity/duo_api_golang"
 )
 
-var (
-	duoIKey    = ""
-	duoSKey    = ""
-	duoAPIHost = ""
-)
-
-// duoEnabled returns true when duoIKey, duoSKey, and duoAPIHost are non zero.
-func duoEnabled() bool {
-	return duoIKey != "" && duoSKey != "" && duoAPIHost != ""
-}
-
-func DuoAuth(next http.Handler) http.Handler {
+// DuoAuth inserts a Duo auth middleware before next.
+func DuoAuth(next http.Handler, duoIKey, duoSKey, duoAPIHost string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		staffid, _, ok := req.BasicAuth()
 		if !ok {
@@ -29,14 +19,14 @@ func DuoAuth(next http.Handler) http.Handler {
 				return
 			}
 		}
-		if err := duoAuth(staffid); err != nil {
+		if err := duoAuth(staffid, duoIKey, duoSKey, duoAPIHost); err != nil {
 			http.Error(w, err.Error(), 403)
 		}
 		next.ServeHTTP(w, req)
 	})
 }
 
-func duoAuth(staffid string) error {
+func duoAuth(staffid, duoIKey, duoSKey, duoAPIHost string) error {
 	const userAgent = "kubetoken/1.0"
 	duo := duoapi.NewDuoApi(duoIKey, duoSKey, duoAPIHost, userAgent)
 	params := make(url.Values)
@@ -72,6 +62,5 @@ func duoAuth(staffid string) error {
 	if result.Response.Result != "allow" {
 		return fmt.Errorf("request denied: %s: %s", result.Response.Status, result.Response.Message)
 	}
-
 	return nil
 }

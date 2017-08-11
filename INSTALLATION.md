@@ -34,13 +34,11 @@ You _must_ set the LDAP search base for both`cmd/kubetoken` _and_ `cmd/kubetoken
 
 ## DUO two factor authentication
 
-Kubetoken supports 2fa via the DUO. This feature is disabled bu default. To enable this feature set the following three variables when linking `kubetoken`
+Kubetoken supports 2fa via the DUO. This feature is disabled by default. To enable this feature set the following three flags in your kubetokend deployment
 
-```
--X main.duoIKey=$your duo ikey value$
--X main.duoSKey=$your duo skey value$
--X main.duoAPIHost=$the hostname of your duo api server$
-```
+- `--duoikey` (defaults to `DUO_IKEY`)
+- `--duoskey` (defaults to `DUO_SKEY`)
+- `--duoapihost` (defaults to `DUO_API_HOST`)
 
 All three values can be retrieved from the admin console by someone with Duo administration rights for your organisation.
 

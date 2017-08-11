@@ -29,6 +29,9 @@ func main() {
 	fmt.Println(os.Args[0], "version:", kubetoken.Version)
 
 	ldapHost := kingpin.Flag("ldap", "ldap host to use (:636 assumed)").Required().String()
+	duoIKey := kingpin.Flag("duoikey", "Duo ikey value (support disabled if not set)").Default(os.Getenv("DUO_IKEY")).String()
+	duoSKey := kingpin.Flag("duoskey", "Duo skey value (support disabled if not set)").Default(os.Getenv("DUO_SKEY")).String()
+	duoAPIHost := kingpin.Flag("duoapihost", "Duo API Host (support disabled if not set)").Default(os.Getenv("DUO_API_HOST")).String()
 	configFile := kingpin.Flag("config", "path to kubetoken.json").Default("/config/kubetoken.json").String()
 	kingpin.Parse()
 
@@ -37,7 +40,7 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
-	fmt.Print(os.Args[0], "loaded config: ")
+	fmt.Println(os.Args[0], "loaded config: ")
 	b, err := json.MarshalIndent(config, "", "  ")
 	check(err)
 	fmt.Printf("%s\n", b)
@@ -55,16 +58,16 @@ func main() {
 	// If Duo is enabled, redirect signcsr to a duo authenticated version
 	// this lets the client detect this and print the appropriate message
 	// before re-submitting.
-	if duoEnabled() {
+	if *duoIKey != "" && *duoSKey != "" && *duoAPIHost != "" {
+		fmt.Println("Duo support enabled, using api host:", *duoAPIHost)
 		r.HandleFunc("/api/v1/signcsr", func(w http.ResponseWriter, req *http.Request) {
 			w.Header().Set("Location", "/api/v1/signcsr2fa")
 			w.WriteHeader(399)
 		})
+		r.Handle("/api/v1/signcsr2fa", BasicAuth(DuoAuth(signer, *duoIKey, *duoSKey, *duoAPIHost)))
 	} else {
 		r.Handle("/api/v1/signcsr", BasicAuth(signer))
 	}
-
-	r.Handle("/api/v1/signcsr2fa", BasicAuth(DuoAuth(signer)))
 	r.Handle("/api/v1/roles", BasicAuth(&RoleHandler{
 		ldaphost: *ldapHost,
 	}))
