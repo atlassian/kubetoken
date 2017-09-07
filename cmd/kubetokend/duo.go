@@ -21,6 +21,7 @@ func DuoAuth(next http.Handler, duoIKey, duoSKey, duoAPIHost string) http.Handle
 		}
 		if err := duoAuth(staffid, duoIKey, duoSKey, duoAPIHost); err != nil {
 			http.Error(w, err.Error(), 403)
+			return
 		}
 		next.ServeHTTP(w, req)
 	})
