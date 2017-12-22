@@ -1,2 +1,5 @@
 # Ignore bundled vendor libraries
 /vendor/
+
+# Ignore dist binaries
+/dist/
