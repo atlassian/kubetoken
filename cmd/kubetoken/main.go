@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,6 +28,8 @@ import (
 // this value can be overwritten by -ldflags="-X main.kubetokend=$URL"
 var kubetokend = "https://kubetoken.example.com"
 
+var httpClient *http.Client
+
 var (
 	verbose  = kingpin.Flag("verbose", "talk, damnit").Short('v').Bool()
 	dumpJson = kingpin.Flag("json", "dump json").Short('j').Bool()
@@ -41,6 +44,7 @@ func main() {
 		namespace  = kingpin.Flag("namespace", "override namespace.").Short('n').String()
 		host       = kingpin.Flag("host", "kubetokend hostname.").Short('h').Default(kubetokend).String()
 		pass       = kingpin.Flag("password", "password.").Short('P').Default(os.Getenv("KUBETOKEN_PW")).String()
+		insecure   = kingpin.Flag("insecure", "Skip TLS verification.").Short('k').Default("false").Bool()
 	)
 	kingpin.Parse()
 
@@ -55,6 +59,14 @@ func main() {
 		pw, err := gopass.GetPasswd()
 		check(err)
 		*pass = string(pw)
+	}
+
+	httpClient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: *insecure,
+			},
+		},
 	}
 
 	// fetch available roles to check the staffid password
@@ -105,7 +117,8 @@ func fetchRoles(host, user, pass string) ([]string, error) {
 	}
 
 	req.SetBasicAuth(user, pass)
-	resp, err := http.DefaultClient.Do(req)
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +142,9 @@ func submitCSR(uri string, user, pass string, csr []byte) (*kubetoken.Certificat
 	if err != nil {
 		return nil, err
 	}
+
 	req.SetBasicAuth(user, pass)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
