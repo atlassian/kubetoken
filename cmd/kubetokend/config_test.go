@@ -9,8 +9,6 @@ import (
 	"strings"
 	"syscall"
 	"testing"
-
-	"github.com/atlassian/kubetoken"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -73,6 +71,7 @@ func TestLoadConfig(t *testing.T) {
 					"clusters": {
 				            "example": "https://example.com"
 					},
+			                "caclustercert": "/ssl/example-cluster/ca.pem",
 			                "cacert": "/ssl/example-dev/ca.pem",
 			                "privkey": "/ssl/example-dev/ca-key.pem"
 			             }
@@ -83,18 +82,45 @@ func TestLoadConfig(t *testing.T) {
 			Environments: []Environment{{
 				Customer:    "example",
 				Environment: "dev",
-				Contexts: []struct {
-					CACert           string            `json:"cacert"`  // path to ca cert
-					PrivKey          string            `json:"privkey"` // path to ca cert private key
-					caCertPEM        []byte            // contents of the CAcert file, as PEM.
-					Clusters         map[string]string `json:"clusters"`
-					kubetoken.Signer `json:"-"`
-				}{{
-					Clusters: map[string]string{
-						"example": "https://example.com",
-					},
-					CACert:  "/ssl/example-dev/ca.pem",
+				Contexts: []Context{{
+					CAClusterCert: "/ssl/example-cluster/ca.pem",
+					CACert: "/ssl/example-dev/ca.pem",
 					PrivKey: "/ssl/example-dev/ca-key.pem",
+					Clusters: map[string]string{
+					    "example": "https://example.com",
+					},
+				}},
+			}},
+		},
+	},
+	{
+		path: mkjson(`{
+			  "environments": [
+			      {
+                      "customer": "example",
+                      "env": "dev",
+                      "contexts": [
+                         {
+                            "clusters": {
+                            	"example": "https://example.com"
+                            },
+                            "cacert": "/ssl/example-dev/ca.pem",
+                            "privkey": "/ssl/example-dev/ca-key.pem"
+                        }
+                      ]
+			      }]
+		         }`),
+		want: &Config{
+			Environments: []Environment{{
+				Customer:    "example",
+				Environment: "dev",
+				Contexts: []Context{{
+					CAClusterCert: "",
+					CACert: "/ssl/example-dev/ca.pem",
+					PrivKey: "/ssl/example-dev/ca-key.pem",
+					Clusters: map[string]string{
+					    "example": "https://example.com",
+					},
 				}},
 			}},
 		},

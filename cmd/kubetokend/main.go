@@ -191,7 +191,7 @@ func (s *CertificateSigner) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 	for _, c := range env.Contexts {
 		contexts = append(contexts, kubetoken.Context{
 			Files: map[string][]byte{
-				"ca.pem":                    c.caCertPEM,
+				"ca.pem":                    c.caClusterCertPEM,
 				fmt.Sprintf("%s.pem", user): certPEM,
 			},
 			Clusters: c.Clusters,
@@ -203,7 +203,7 @@ func (s *CertificateSigner) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 		Username: user,
 		Role:     csr.Subject.Organization[0],
 		Files: map[string][]byte{
-			"ca.pem":                    env.Contexts[0].caCertPEM,
+			"ca.pem":                    env.Contexts[0].caClusterCertPEM,
 			fmt.Sprintf("%s.pem", user): certPEM,
 		},
 		Customer:    env.Customer,
