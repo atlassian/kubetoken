@@ -98,9 +98,9 @@ func userdn(user string) string {
 
 func binddn(user string) string {
 	if strings.HasSuffix(user, "-bot") {
-		return "CN=%s,OU=bots,OU=people,DC=office,DC=atlassian,DC=com"
+		return "CN=%s," + kubetoken.BotOU + "," + kubetoken.SearchBase
 	}
-	return "CN=%s,OU=people,DC=office,DC=atlassian,DC=com"
+	return "CN=%s," + kubetoken.UserOU + "," + kubetoken.SearchBase
 }
 
 func BasicAuth(next http.Handler) http.Handler {
@@ -157,7 +157,7 @@ func (s *CertificateSigner) ServeHTTP(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	// find customer/environemnt for role
+	// find customer/environment for role
 	var env *Environment
 	for i := range s.Config.Environments {
 		e := &s.Config.Environments[i]
