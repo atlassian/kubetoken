@@ -32,6 +32,18 @@ To set the LDAP search base when building `cmd/kubetoken` _and_ `cmd/kubetokend`
 
 You _must_ set the LDAP search base for both`cmd/kubetoken` _and_ `cmd/kubetokend`.
 
+### Optionally set the UserOU, BotOU and GroupOU search strings
+
+To set the UserOU, BotOU and GroupOU search strings when building `cmd/kubetoken` _and_ `cmd/kubetokend`, set the address using the linker flags
+```
+-X github.com/atlassian/kubetoken.UserOU=OU=people
+-X github.com/atlassian/kubetoken.BotOU=OU=bots,OU=people
+-X github.com/atlassian/kubetoken.GroupOU=OU=access,OU=groups
+```
+
+You _must_ set the UserOU, BotOU and GroupOU search strings for both`cmd/kubetoken` _and_ `cmd/kubetokend`.
+The values above are the defaults that will be used if UserOU, BotOU or GroupOU is not explicitly set.
+
 ## DUO two factor authentication
 
 Kubetoken supports 2fa via the DUO. This feature is disabled by default. To enable this feature set the following three flags in your kubetokend deployment

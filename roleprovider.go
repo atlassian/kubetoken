@@ -20,9 +20,9 @@ func userdn(user string) string {
 
 func binddn(user string) string {
 	if strings.HasSuffix(user, "-bot") {
-		return "CN=%s,OU=bots,OU=people," + SearchBase
+		return "CN=%s," + BotOU + "," + SearchBase
 	}
-	return "CN=%s,OU=people," + SearchBase
+	return "CN=%s," + UserOU + "," + SearchBase
 }
 
 func (r *ADRoleProvider) FetchRolesForUser(user string) ([]string, error) {
@@ -39,7 +39,7 @@ func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
 	// find all the kube- roles
 	filter := fmt.Sprintf("(&(cn=kube-*-*-*-dl-*)(member:1.2.840.113556.1.4.1941:=%s))", userdn)
 	kubeRoles := ldap.NewSearchRequest(
-		"OU=access,OU=groups,"+SearchBase,
+		GroupOU + "," + SearchBase,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		filter,
 		[]string{"cn"},

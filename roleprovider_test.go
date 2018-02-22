@@ -1,10 +1,6 @@
-package main
+package kubetoken
 
-import (
-	"testing"
-
-	"github.com/atlassian/kubetoken"
-)
+import "testing"
 
 func TestBinddn(t *testing.T) {
 	tests := []struct {
@@ -21,7 +17,7 @@ func TestBinddn(t *testing.T) {
 		want: "CN=%s,OU=bots,OU=people,DC=office,DC=atlassian,DC=com",
 	}}
 
-	kubetoken.SearchBase = "DC=office,DC=atlassian,DC=com"
+	SearchBase = "DC=office,DC=atlassian,DC=com"
 	for _, tt := range tests {
 		got := binddn(tt.role)
 		if got != tt.want {
