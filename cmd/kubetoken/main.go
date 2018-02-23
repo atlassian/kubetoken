@@ -230,7 +230,7 @@ func processCertificateResponse(kubeconfig string, result *kubetoken.Certificate
 			"--client-certificate", usercertfile); err != nil {
 			return err
 		}
-		cafile := filepath.Join(certsdir, "ca.pem")
+		cafile := filepath.Join(certsdir, result.Environment, "ca.pem")
 		if err := writeFile(cafile, result.Files["ca.pem"]); err != nil {
 			return err
 		}

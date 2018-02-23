@@ -11,18 +11,21 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Context struct {
+	CAClusterCert    string `json:"caclustercert"` // path to ca cert for kubernetes clusters
+	CACert           string `json:"cacert"` // path to ca cert for kubetoken
+	PrivKey          string `json:"privkey"` // path to ca cert private key for kubetoken
+	caClusterCertPEM []byte // contents of the CAClusterCert file, as PEM.
+	caCertPEM        []byte // contents of the CACert file, as PEM.
+	Clusters         map[string]string `json:"clusters"`
+	kubetoken.Signer `json:"-"`
+}
+
 type Environment struct {
 	Name        string `json:"name"`
 	Customer    string `json:"customer"`
 	Environment string `json:"env"`
-	caCertPEM   []byte // contents of the CAcert file, as PEM.
-	Contexts    []struct {
-		CACert           string            `json:"cacert"`  // path to ca cert
-		PrivKey          string            `json:"privkey"` // path to ca cert private key
-		caCertPEM        []byte            // contents of the CAcert file, as PEM.
-		Clusters         map[string]string `json:"clusters"`
-		kubetoken.Signer `json:"-"`
-	} `json:"contexts"`
+	Contexts    []Context `json:"contexts"`
 }
 
 type Config struct {
@@ -75,6 +78,22 @@ func loadCertificates(c *Config) error {
 			ctx.Signer.PrivKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
 			if err != nil {
 				return err
+			}
+
+			if ctx.CAClusterCert != "" {
+				caClusterCertPEM, err := ioutil.ReadFile(ctx.CAClusterCert)
+				if err != nil {
+					return errors.WithMessage(err, ctx.CAClusterCert)
+				}
+				block, _ = pem.Decode(caClusterCertPEM)
+				if block == nil {
+					return errors.Errorf("%v: pem decode caClusterCertPEM failed", ctx.CAClusterCert)
+				}
+				ctx.caClusterCertPEM = caClusterCertPEM
+			} else {
+				// If CAClusterCert is not set, use kubetoken CA as the cluster CA
+				ctx.CAClusterCert = ctx.CACert
+				ctx.caClusterCertPEM = ctx.caCertPEM
 			}
 		}
 	}
