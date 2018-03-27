@@ -49,7 +49,7 @@ func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
 	}
 	defer conn.Close()
 
-	// find all the kube- roles
+	// find all the SearchGroups roles
 	filter := fmt.Sprintf("(&(%s)(member:1.2.840.113556.1.4.1941:=%s))", groupName(), userdn)
 	kubeRoles := ldap.NewSearchRequest(
 		GroupOU + "," + SearchBase,
