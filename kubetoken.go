@@ -7,6 +7,9 @@ var Version string = "unknown"
 // SearchBase is the LDAP search base.
 var SearchBase string = "DC=example,DC=com"
 
+// Group prefix to use in ldap search
+var SearchGroups string = "kube"
+
 // UserOU
 var UserOU string = "OU=people"
 

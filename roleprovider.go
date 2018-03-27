@@ -25,6 +25,19 @@ func binddn(user string) string {
 	return "CN=%s," + UserOU + "," + SearchBase
 }
 
+func groupName() string {
+	groups := strings.Split(SearchGroups, ",")
+	for i, group := range groups {
+		escapedPrefix := ldap.EscapeFilter(group)
+		groups[i] = fmt.Sprintf("cn=%s-*-*-*-dl-*", escapedPrefix)
+	}
+
+	if len(groups) == 1 {
+		return groups[0]
+	}
+	return "|(" + strings.Join(groups,")(") + ")"
+}
+
 func (r *ADRoleProvider) FetchRolesForUser(user string) ([]string, error) {
 	return fetchRolesForUser(&r.LDAPCreds, userdn(user))
 }
@@ -37,7 +50,7 @@ func fetchRolesForUser(creds *LDAPCreds, userdn string) ([]string, error) {
 	defer conn.Close()
 
 	// find all the kube- roles
-	filter := fmt.Sprintf("(&(cn=kube-*-*-*-dl-*)(member:1.2.840.113556.1.4.1941:=%s))", userdn)
+	filter := fmt.Sprintf("(&(%s)(member:1.2.840.113556.1.4.1941:=%s))", groupName(), userdn)
 	kubeRoles := ldap.NewSearchRequest(
 		GroupOU + "," + SearchBase,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
