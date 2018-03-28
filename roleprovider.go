@@ -27,15 +27,20 @@ func binddn(user string) string {
 
 func groupName() string {
 	groups := strings.Split(SearchGroups, ",")
-	for i, group := range groups {
+	var resultGroups []string
+	for _, group := range groups {
+		if group == "" {
+			continue
+		}
 		escapedPrefix := ldap.EscapeFilter(group)
-		groups[i] = fmt.Sprintf("cn=%s-*-*-*-dl-*", escapedPrefix)
+		expanded := fmt.Sprintf("cn=%s-*-*-*-dl-*", escapedPrefix)
+		resultGroups = append(resultGroups, expanded)
 	}
 
-	if len(groups) == 1 {
-		return groups[0]
+	if len(resultGroups) == 1 {
+		return resultGroups[0]
 	}
-	return "|(" + strings.Join(groups,")(") + ")"
+	return "|(" + strings.Join(resultGroups,")(") + ")"
 }
 
 func (r *ADRoleProvider) FetchRolesForUser(user string) ([]string, error) {

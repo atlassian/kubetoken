@@ -36,6 +36,9 @@ func TestGroupName(t *testing.T) {
 	}, {
 		group: "kube,paas",
 		want: "|(cn=kube-*-*-*-dl-*)(cn=paas-*-*-*-dl-*)",
+	}, {
+		group: "kube,paas,",
+		want: "|(cn=kube-*-*-*-dl-*)(cn=paas-*-*-*-dl-*)",
 	}}
 
 	for _, tt := range tests {
