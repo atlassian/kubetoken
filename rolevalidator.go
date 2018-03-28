@@ -44,7 +44,7 @@ func (r *ADRoleValidater) ValidateRoleForUser(user, role string) error {
 	}
 	switch len(sr.Entries) {
 	case 0:
-		return fmt.Errorf("%s is not a member of %s", userdn, roledn)
+		return fmt.Errorf("%s is not a member of %s", userdn(user), roledn)
 	case 1:
 		usercn := sr.Entries[0].GetAttributeValue("cn")
 		if user != usercn {
