@@ -267,7 +267,7 @@ func readCSR(r io.Reader) (*x509.CertificateRequest, error) {
 }
 
 func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, error) {
-	re, err := regexp.Compile(`^kube-(?P<customer>\w+)-(?P<ns>\w+)-(?P<env>\w+)-dl-`)
+	re, err := regexp.Compile(kubetoken.NamespaceRegex)
 	if err != nil {
 		return "", "", "", err
 	}
