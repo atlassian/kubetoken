@@ -282,6 +282,11 @@ func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, err
 			customer = m[i]
 		case "ns":
 			ns = m[i]
+			// Names of objects are DNS_LABELs
+			// https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md#definitions
+			if len(ns) > 63 {
+				return "", "", "", fmt.Errorf("namespace must be 63 characters or less. role %q", role)
+			}
 		case "env":
 			env = m[i]
 		}

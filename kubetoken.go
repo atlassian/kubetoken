@@ -11,7 +11,7 @@ var SearchBase string = "DC=example,DC=com"
 var SearchGroups string = "kube"
 
 // NamespaceRegex is used to extract customer, namespace, and env from ldap queries
-var NamespaceRegex string = `^kube-(?P<customer>\w+)-(?P<ns>\w+)-(?P<env>\w+)-dl-`
+var NamespaceRegex string = `^kube-(?P<customer>\w+)-(?P<ns>[a-z0-9]([-a-z0-9]*[a-z0-9])?)-(?P<env>\w+)-dl-`
 
 // UserOU
 var UserOU string = "OU=people"
