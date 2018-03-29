@@ -10,6 +10,9 @@ var SearchBase string = "DC=example,DC=com"
 // Group prefix to use in ldap search
 var SearchGroups string = "kube"
 
+// NamespaceRegex is used to extract customer, namespace, and env from ldap queries
+var NamespaceRegex string = `^kube-(?P<customer>\w+)-(?P<ns>\w+)-(?P<env>\w+)-dl-`
+
 // UserOU
 var UserOU string = "OU=people"
 

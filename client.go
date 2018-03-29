@@ -1,7 +1,5 @@
 package kubetoken
 
-import "regexp"
-
 type CertificateResponse struct {
 	Username    string            `json:"username"`
 	Role        string            `json:"role"`
@@ -18,10 +16,3 @@ type Context struct {
 	Clusters map[string]string `json:"clusters"`
 }
 
-var splitRE = regexp.MustCompile(`^kube-(?P<customer>\w+)-(?P<namespace>\w+)-(?P<environment>\w+)-dl-(?P<role>\w+)$`)
-
-// split parses a role into its component customer, environment, role, and namespace
-func split(role string) (string, string, string, string) {
-	match := splitRE.FindStringSubmatch(role)
-	return match[1], match[3], match[2], match[4]
-}
