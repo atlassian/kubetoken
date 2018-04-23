@@ -4,6 +4,11 @@ go:
   - 1.8.x
   - tip
 
+before_install:
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+install:
+  - dep ensure
 script:
   - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test
   - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test -race
