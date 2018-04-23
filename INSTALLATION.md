@@ -2,6 +2,15 @@
 
 This page describes the steps necessary to customise kubetoken for your environment.
 
+## Dependencies management
+
+[dep](https://github.com/golang/dep) is used for package dependencies management.
+After installing dep, you can run this command to get all the dependent packages:
+```
+dep ensure
+```
+
+
 ## Linker variables
 
 To avoid the necessity for a configuration file to be distributed alongside kubetoken, the default value of the variables for 

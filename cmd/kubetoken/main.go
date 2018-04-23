@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strings"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 
@@ -32,15 +33,41 @@ var (
 	dumpJson = kingpin.Flag("json", "dump json").Short('j').Bool()
 )
 
+type keyWordsList []string
+
+func (kwl *keyWordsList) Set(value string) error {
+	if len(value) > 0 {
+		*kwl = append(*kwl, value)
+		return nil
+	}
+	return fmt.Errorf("empty string")
+}
+
+func (kwl *keyWordsList) String() string {
+	return ""
+}
+
+func (kwl *keyWordsList) IsCumulative() bool {
+	return true
+}
+
+// KeyWordsList to convert args into a *[]string
+func KeyWordsList(s kingpin.Settings) *[]string {
+	keyWords := new([]string)
+	s.SetValue((*keyWordsList)(keyWords))
+	return keyWords
+}
+
 func main() {
 	var (
-		user       = kingpin.Flag("user", "StaffID username.").Short('u').Default(os.Getenv("USER")).String()
-		kubeconfig = kingpin.Flag("kubeconfig", "kubeconfig location.").Default(filepath.Join(os.Getenv("HOME"), ".kube", "config")).String()
-		version    = kingpin.Flag("version", "print version string and exit.").Bool()
-		filter     = kingpin.Flag("filter", "only show matching roles.").Short('f').String()
-		namespace  = kingpin.Flag("namespace", "override namespace.").Short('n').String()
-		host       = kingpin.Flag("host", "kubetokend hostname.").Short('h').Default(kubetokend).String()
-		pass       = kingpin.Flag("password", "password.").Short('P').Default(os.Getenv("KUBETOKEN_PW")).String()
+		user         = kingpin.Flag("user", "StaffID username.").Short('u').Default(os.Getenv("USER")).String()
+		kubeconfig   = kingpin.Flag("kubeconfig", "kubeconfig location.").Default(filepath.Join(os.Getenv("HOME"), ".kube", "config")).String()
+		version      = kingpin.Flag("version", "print version string and exit.").Bool()
+		filter       = kingpin.Flag("filter", "only show roles which matches supplied regex.").Short('f').String()
+		namespace    = kingpin.Flag("namespace", "override namespace.").Short('n').String()
+		host         = kingpin.Flag("host", "kubetokend hostname.").Short('h').Default(kubetokend).String()
+		pass         = kingpin.Flag("password", "password.").Short('P').Default(os.Getenv("KUBETOKEN_PW")).String()
+		keyWordsList = KeyWordsList(kingpin.Arg("keywords", "key words(NOT regex like filter) list used to filter roles. If keywords and filter are used at the same time, both of them need to pass."))
 	)
 	kingpin.Parse()
 
@@ -62,7 +89,7 @@ func main() {
 	roles, err := fetchRoles(*host, *user, *pass)
 	check(err)
 
-	roles, err = filterRoles(roles, *filter)
+	roles, err = filterRoles(roles, *filter, *keyWordsList)
 	check(err)
 	sort.Strings(roles)
 
@@ -182,13 +209,26 @@ func chooseRole(roles []string) (string, error) {
 	return roles[n], nil
 }
 
-func filterRoles(roles []string, filter string) ([]string, error) {
+func filterRoles(roles []string, filter string, keyWordsList []string) ([]string, error) {
 	re, err := regexp.Compile(filter)
 	if err != nil {
 		return nil, err
 	}
 	for i := 0; i < len(roles); {
+		regexMatched := false
 		if re.MatchString(roles[i]) {
+			regexMatched = true
+		}
+		keyWordsMatched := true
+		roleInLowerCase := strings.ToLower(roles[i])
+		for _, f := range keyWordsList {
+			if strings.Contains(roleInLowerCase, strings.ToLower(f)) {
+				continue
+			}
+			keyWordsMatched = false
+			break
+		}
+		if regexMatched && keyWordsMatched {
 			i++
 			continue
 		}
