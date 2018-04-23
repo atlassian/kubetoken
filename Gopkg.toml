@@ -1,31 +1,3 @@
-[[constraint]]
-  branch = "master"
-  name = "github.com/duosecurity/duo_api_golang"
-
-[[constraint]]
-  name = "github.com/gorilla/handlers"
-  version = "1.3.0"
-
-[[constraint]]
-  name = "github.com/gorilla/mux"
-  version = "1.6.1"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/howeyc/gopass"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
-
-[[constraint]]
-  name = "gopkg.in/alecthomas/kingpin.v2"
-  version = "2.2.6"
-
-[[constraint]]
-  name = "gopkg.in/ldap.v2"
-  version = "2.5.1"
-
 [prune]
   go-tests = true
   unused-packages = true

@@ -44,7 +44,7 @@ func TestFilterRoles(t *testing.T) {
 	}, {
 		// filter and key words list specified at the same time
 		// matches nothing in this case
-		roles:        []string{"alpha", "beta", "gamma"},
+		roles:        []string{"Alpha", "beta", "gamma"},
 		filter:       "^b",
 		keyWordsList: []string{"al", "ha"},
 		want:         []string{},
