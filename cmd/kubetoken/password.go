@@ -18,15 +18,13 @@ func getPassword(user string, skipKeyringFetch bool) string {
 	// Attempt to get password from the keyring first
 	if !skipKeyringFetch {
 		password, err := getKeyringPassword(user)
-		if err != nil && err != keyring.ErrNotFound {
-			check(err)
-		}
 		if err == nil {
 			if *verbose {
 				fmt.Printf("Got password from keyring for user %v\n", user)
 			}
 			return password
 		}
+		fmt.Printf("Warning: unable to get password from keyring, err: %v\n", err)
 	}
 
 	if *verbose && skipKeyringFetch {
@@ -36,7 +34,12 @@ func getPassword(user string, skipKeyringFetch bool) string {
 	// Password was not found, prompt the user for it
 	// Save the password in the keyring
 	password = promptForPassword(user)
-	check(setKeyringPassword(user, password))
+
+	err := setKeyringPassword(user, password)
+	if err != nil {
+		fmt.Printf("Warning: unable to set password to keyring, err: %v\n", err)
+	}
+
 	return password
 }
 
