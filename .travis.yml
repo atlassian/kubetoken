@@ -12,3 +12,4 @@ install:
   - make setup
 script:
   - make test-race
+  - make build
