@@ -11,4 +11,4 @@ test:
 	go test ./... -cover
 
 test-race:
-	go test ./... -cover -race
+	go test ./... -race
