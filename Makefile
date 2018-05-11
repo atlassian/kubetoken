@@ -1,8 +1,8 @@
 .PHONY: build setup test test-race
 
 build:
-	CGO_ENABLED=1 go build -o kubetoken cmd/kubetoken/*.go
-	CGO_ENABLED=1 go build -o kubetokend cmd/kubetokend/*.go
+	go build -o kubetoken cmd/kubetoken/*.go
+	go build -o kubetokend cmd/kubetokend/*.go
 
 setup:
 	dep ensure
