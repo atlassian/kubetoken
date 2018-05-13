@@ -12,11 +12,11 @@ const keyringService = "kubetoken"
 // getPassword handles the flow for getting a password from the user
 // Attempts to get the password from the keyring first, then prompts
 // Saves the prompted password to the keyring
-func getPassword(user string, skipKeyringFetch bool) string {
+func getPassword(user string, promptPassword bool, skipKeyring bool) string {
 	var password string
 
 	// Attempt to get password from the keyring first
-	if !skipKeyringFetch {
+	if !promptPassword && !skipKeyring {
 		password, err := getKeyringPassword(user)
 		if err == nil {
 			if *verbose {
@@ -25,19 +25,20 @@ func getPassword(user string, skipKeyringFetch bool) string {
 			return password
 		}
 		fmt.Printf("Warning: unable to get password from keyring, err: %v\n", err)
-	}
-
-	if *verbose && skipKeyringFetch {
+	} else if *verbose {
 		fmt.Println("Skipping checking of keyring")
 	}
 
 	// Password was not found, prompt the user for it
-	// Save the password in the keyring
 	password = promptForPassword(user)
 
-	err := setKeyringPassword(user, password)
-	if err != nil {
-		fmt.Printf("Warning: unable to set password to keyring, err: %v\n", err)
+	// Save the password in the keyring
+	if !skipKeyring {
+		if err := setKeyringPassword(user, password); err != nil {
+			fmt.Printf("Warning: unable to set password to keyring, err: %v\n", err)
+		}
+	} else if *verbose {
+		fmt.Println("Skipping setting of keyring")
 	}
 
 	return password

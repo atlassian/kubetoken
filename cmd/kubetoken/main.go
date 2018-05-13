@@ -66,6 +66,7 @@ func main() {
 		host         = kingpin.Flag("host", "kubetokend hostname.").Short('h').Default(kubetokend).String()
 		pass         = kingpin.Flag("password", "password.").Short('P').Default(os.Getenv("KUBETOKEN_PW")).String()
 		passPrompt   = kingpin.Flag("password-prompt", "prompt for password (replaces current password in keyring)").Bool()
+		skipKeyring  = kingpin.Flag("skip-keyring", "skip usage of the keyring").Bool()
 		keyWordsList = KeyWordsList(kingpin.Arg("keywords", "key words(NOT regex like filter) list used to filter roles. If keywords and filter are used at the same time, both of them need to pass."))
 	)
 	kingpin.Parse()
@@ -78,7 +79,7 @@ func main() {
 
 	// Retrieve the password
 	if *pass == "" {
-		*pass = getPassword(*user, *passPrompt)
+		*pass = getPassword(*user, *passPrompt, *skipKeyring)
 	}
 
 	// fetch available roles to check the staffid password

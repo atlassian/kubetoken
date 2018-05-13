@@ -33,6 +33,6 @@ func TestGetPasswordFromKeyringFlow(t *testing.T) {
 	err := setKeyringPassword(user, pass)
 	assert.Nil(t, err)
 
-	password := getPassword(user, false)
+	password := getPassword(user, false, false)
 	assert.Equal(t, pass, password)
 }
