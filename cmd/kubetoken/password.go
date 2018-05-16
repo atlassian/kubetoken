@@ -14,33 +14,21 @@ const keyringService = "kubetoken"
 // Saves the prompted password to the keyring
 func getPassword(user string, promptPassword bool, skipKeyring bool) string {
 	var password string
-
-	// Attempt to get password from the keyring first
-	if !promptPassword && !skipKeyring {
-		password, err := getKeyringPassword(user)
-		if err == nil {
-			if *verbose {
-				fmt.Printf("Got password from keyring for user %v\n", user)
-			}
-			return password
+	if promptPassword {
+		password = promptForPassword(user)
+		if !skipKeyring {
+			setKeyringPassword(user, password)
 		}
-		fmt.Printf("Warning: unable to get password from keyring, err: %v\n", err)
-	} else if *verbose {
-		fmt.Println("Skipping checking of keyring")
-	}
-
-	// Password was not found, prompt the user for it
-	password = promptForPassword(user)
-
-	// Save the password in the keyring
-	if !skipKeyring {
-		if err := setKeyringPassword(user, password); err != nil {
-			fmt.Printf("Warning: unable to set password to keyring, err: %v\n", err)
+	} else if skipKeyring {
+		password = promptForPassword(user)
+	} else {
+		var err error
+		password, err = getKeyringPassword(user)
+		if err != nil {
+			password = promptForPassword(user)
+			setKeyringPassword(user, password)
 		}
-	} else if *verbose {
-		fmt.Println("Skipping setting of keyring")
 	}
-
 	return password
 }
 
@@ -60,7 +48,11 @@ func getKeyringPassword(user string) (string, error) {
 	if *verbose {
 		fmt.Printf("Getting password from keyring for service %v, user %v\n", keyringService, user)
 	}
-	return keyring.Get(keyringService, user)
+	password, err := keyring.Get(keyringService, user)
+	if *verbose && err != nil {
+		fmt.Printf("Warning: error whilst getting password from keyring: %v\n", err)
+	}
+	return password, err
 }
 
 // setKeyringPassword sets the password in the keyring
@@ -68,5 +60,9 @@ func setKeyringPassword(user string, password string) error {
 	if *verbose {
 		fmt.Printf("Setting password in keyring for service %v, user %v\n", keyringService, user)
 	}
-	return keyring.Set(keyringService, user, password)
+	err := keyring.Set(keyringService, user, password)
+	if *verbose && err != nil {
+		fmt.Printf("Warning: error whilst setting password to keyring: %v\n", err)
+	}
+	return err
 }
