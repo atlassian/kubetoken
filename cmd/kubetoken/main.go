@@ -16,13 +16,11 @@ import (
 	"sort"
 	"strings"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/atlassian/kubetoken"
 	"github.com/atlassian/kubetoken/internal/cert"
 	"github.com/pkg/errors"
-
-	"github.com/howeyc/gopass"
 )
 
 // this value can be overwritten by -ldflags="-X main.kubetokend=$URL"
@@ -67,6 +65,8 @@ func main() {
 		namespace    = kingpin.Flag("namespace", "override namespace.").Short('n').String()
 		host         = kingpin.Flag("host", "kubetokend hostname.").Short('h').Default(kubetokend).String()
 		pass         = kingpin.Flag("password", "password.").Short('P').Default(os.Getenv("KUBETOKEN_PW")).String()
+		passPrompt   = kingpin.Flag("password-prompt", "prompt for password (replaces current password in keyring)").Bool()
+		skipKeyring  = kingpin.Flag("skip-keyring", "skip usage of the keyring").Bool()
 		keyWordsList = KeyWordsList(kingpin.Arg("keywords", "key words(NOT regex like filter) list used to filter roles. If keywords and filter are used at the same time, both of them need to pass."))
 	)
 	kingpin.Parse()
@@ -77,11 +77,9 @@ func main() {
 
 	checkKubectlOrExit()
 
+	// Retrieve the password
 	if *pass == "" {
-		fmt.Printf("Staff ID password for %s: ", *user)
-		pw, err := gopass.GetPasswd()
-		check(err)
-		*pass = string(pw)
+		*pass = getPassword(*user, *passPrompt, *skipKeyring)
 	}
 
 	// fetch available roles to check the staffid password

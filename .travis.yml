@@ -1,14 +1,15 @@
 language: go
 go_import_path: github.com/atlassian/kubetoken
 go:
-  - 1.8.x
+  - 1.9.x
+  - 1.10.x
   - tip
 
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 install:
-  - dep ensure
+  - make setup
 script:
-  - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test
-  - go list github.com/atlassian/kubetoken/... | grep -v vendor | xargs go test -race
+  - make test-race
+  - make build
