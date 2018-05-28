@@ -272,23 +272,35 @@ func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, err
 		return "", "", "", err
 	}
 	m := re.FindStringSubmatch(role)
-	if len(m) != 4 {
+	if m == nil {
 		return "", "", "", fmt.Errorf("no match for role %q", role)
 	}
 	var customer, ns, env string
+
+	// This abuses how SubexpNames will return the all matching capture groups
+	// for the regular expression, allowing us to use a parenthesized subexpression
+	// with the same name multiple times.
+	// This assumes the capture group is disjoint (OR'd) otherwise it'll just take
+	// the first one.
 	for i, name := range re.SubexpNames() {
 		switch name {
 		case "customer":
-			customer = m[i]
+			if m[i] != nil {
+				customer = m[i]
+			}
 		case "ns":
-			ns = m[i]
-			// Names of objects are DNS_LABELs
-			// https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md#definitions
-			if len(ns) > 63 {
-				return "", "", "", fmt.Errorf("namespace must be 63 characters or less. role %q", role)
+			if m[i] != nil {
+				ns = m[i]
+				// Names of objects are DNS_LABELs
+				// https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md#definitions
+				if len(ns) > 63 {
+					return "", "", "", fmt.Errorf("namespace must be 63 characters or less. role %q", role)
+				}
 			}
 		case "env":
-			env = m[i]
+			if m[i] != nil {
+				env = m[i]
+			}
 		}
 	}
 	if customer == "" {
