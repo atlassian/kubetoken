@@ -285,11 +285,11 @@ func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, err
 	for i, name := range re.SubexpNames() {
 		switch name {
 		case "customer":
-			if m[i] != nil {
+			if m[i] != "" {
 				customer = m[i]
 			}
 		case "ns":
-			if m[i] != nil {
+			if m[i] != "" {
 				ns = m[i]
 				// Names of objects are DNS_LABELs
 				// https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md#definitions
@@ -298,7 +298,7 @@ func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, err
 				}
 			}
 		case "env":
-			if m[i] != nil {
+			if m[i] != "" {
 				env = m[i]
 			}
 		}
