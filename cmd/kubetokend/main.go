@@ -273,6 +273,7 @@ func parseCustomerNamespaceEnvFromRole(role string) (string, string, string, err
 	}
 	m := re.FindStringSubmatch(role)
 	if m == nil {
+		log.Printf("failed to match role %q against regex %q", role, kubetoken.NamespaceRegex)
 		return "", "", "", fmt.Errorf("no match for role %q", role)
 	}
 	var customer, ns, env string
