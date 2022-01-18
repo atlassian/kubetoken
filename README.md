@@ -1,4 +1,4 @@
-# kubetoken
+# kubetoken is no longer maintained.
 
 [![Build Status](https://travis-ci.org/atlassian/kubetoken.svg?branch=master)](https://travis-ci.org/atlassian/kubetoken)
 
